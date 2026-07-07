@@ -36,7 +36,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: url('{{ asset("images/bg_berlian.png") }}') center center / cover no-repeat;
+      background: url('{{ asset("images/berlian1.jpg") }}') center center / cover no-repeat;
       filter: brightness(1.05) contrast(1.15) saturate(1.1);
       z-index: 1;
     }
