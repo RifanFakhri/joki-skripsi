@@ -22,6 +22,14 @@ class GateoutSeeder extends Seeder
                 DB::table('dc_gateout')->insert($chunk);
             }
         }
+
+        // Reset PostgreSQL auto-increment sequence
+        if (config('database.default') === 'pgsql') {
+            $maxId = DB::table('dc_gateout')->max('id');
+            if ($maxId) {
+                DB::statement("SELECT setval('dc_gateout_id_seq', ?)", [$maxId]);
+            }
+        }
     }
 
     private function parseSqlData(string $tableName): array

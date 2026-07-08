@@ -32,5 +32,13 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        // Reset PostgreSQL auto-increment sequence
+        if (config('database.default') === 'pgsql') {
+            $maxId = DB::table('users')->max('id');
+            if ($maxId) {
+                DB::statement("SELECT setval('users_id_seq', ?)", [$maxId]);
+            }
+        }
     }
 }
