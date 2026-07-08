@@ -1,9 +1,13 @@
+@php
+    $role = session('role');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'PELINDO System' }}</title>
+    <title>{{ $title ?? 'SANDRA' }}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -234,6 +238,18 @@
             .sidebar.closed { transform: translateX(0); }
             .content { margin-left: 0 !important; }
         }
+
+        .disabled-menu{
+    background:#d9d9d9 !important;
+    color:#8b8b8b !important;
+    pointer-events:none;
+    cursor:not-allowed;
+    opacity:.7;
+}
+
+.disabled-menu i{
+    color:#8b8b8b;
+}
     </style>
 </head>
 
@@ -277,25 +293,46 @@
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
-    <a href="{{ route('tally.pilihKapal') }}" class="{{ request()->routeIs('tally.pilihKapal') ? 'active' : '' }}">
-        <i class="fa-solid fa-ship"></i> Pilih Kapal
-    </a>
+@if(Session::get('role') == 'tally')
+<a href="{{ route('tally.pilihKapal') }}"
+   class="{{ request()->routeIs('tally.pilihKapal') ? 'active' : '' }}">
+    <i class="fa-solid fa-ship"></i> Pilih Kapal
+</a>
+@else
+<a class="disabled-menu">
+    <i class="fa-solid fa-ship"></i> Pilih Kapal
+</a>
+@endif
 
-    <a href="{{ route('tally.konfirmasi') }}" class="{{ request()->routeIs('tally.konfirmasi') ? 'active' : '' }}">
-        <i class="fa-solid fa-list-check"></i> Tally Konfirmasi
-    </a>
+@if(Session::get('role') == 'tally')
+<a href="{{ route('tally.konfirmasi') }}"
+   class="{{ request()->routeIs('tally.konfirmasi') ? 'active' : '' }}">
+    <i class="fa-solid fa-list-check"></i> Tally Konfirmasi
+</a>
+@else
+<a class="disabled-menu">
+    <i class="fa-solid fa-list-check"></i> Tally Konfirmasi
+</a>
+@endif
 
     <a href="{{ route('discharging') }}" class="{{ request()->routeIs('discharging') ? 'active' : '' }}">
         <i class="fa-solid fa-box-open"></i> Discharging
     </a>
 
     <a href="#" class="btn-gateout-database">
-        <i class="fa-solid fa-database"></i> Gate Out Database
-    </a>
+    <i class="fa-solid fa-database"></i>
+    Gate Out Database
+</a>
 
-    <a href="#" class="btn-gateout-filter">
-        <i class="fa-solid fa-filter"></i> Filter & Export
-    </a>
+    @if(Session::get('role') == 'gateout')
+<a href="#" class="btn-gateout-filter">
+    <i class="fa-solid fa-filter"></i> Filter & Export
+</a>
+@else
+<a class="disabled-menu">
+    <i class="fa-solid fa-filter"></i> Filter & Export
+</a>
+@endif
 
     <a href="{{ route('gateout.chart') }}" class="{{ request()->routeIs('gateout.chart') ? 'active' : '' }}">
     <i class="fa-solid fa-chart-line"></i> Total Discharge
@@ -343,23 +380,6 @@
 
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-
-    document.querySelector(".btn-gateout-database")
-      ?.addEventListener("click", function(e) {
-        e.preventDefault();
-        new bootstrap.Modal(document.getElementById('gateoutModal')).show();
-    });
-
-    document.querySelector(".btn-gateout-filter")
-      ?.addEventListener("click", function(e) {
-        e.preventDefault();
-        new bootstrap.Modal(document.getElementById('gateoutModal')).show();
-    });
-
-});
-</script>
 
 </body>
 </html>

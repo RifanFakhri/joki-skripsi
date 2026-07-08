@@ -2,6 +2,10 @@
 
 @section('content')
 
+@php
+    $role = session('role');
+@endphp
+
 <style>
     body{
         background:#F4F6F9;
@@ -103,4 +107,4 @@
     </div>
 </div>
 
-@endsection
+

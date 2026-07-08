@@ -1,142 +1,388 @@
+@php
+    $role = session('role');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Print Discharging Card</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Print Discharging Card</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-  @page{ margin:0; }
+
+@page{
+    margin:0;
+}
 
 body{
-    font-family: Arial, sans-serif;
-    margin:0; padding:0;
-    background:rgba(0,0,0,0.55);
+    margin:0;
+    padding:0;
+    background:rgba(0,0,0,.55);
+    font-family:'Poppins',sans-serif;
 }
 
-/* CARD POPUP */
+/* =========================
+   POPUP
+========================= */
+
 .popup-wrap{
+
     position:fixed;
-    top:50%; left:50%;
+    top:50%;
+    left:50%;
     transform:translate(-50%,-50%);
-    background:white;
-    width:520px;                  /* lebih lebar agar proporsional */
-    border:3px solid black;
-    border-radius:6px;
-    padding:35px 32px;
-    box-shadow:0 0 25px rgba(0,0,0,.4);
+
+    width:470px;
+    max-width:95%;
+
+    background:#fff;
+
+    border-radius:14px;
+
+    box-shadow:0 12px 40px rgba(0,0,0,.25);
+
+    overflow:hidden;
+
 }
 
-/* HEADER = kiri logo, kanan judul */
+/* =========================
+HEADER
+========================= */
+
 .header{
+
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:28px;
-}
-.header img{
-    width:170px;                 /* sesuai gambar */
-}
-.header-title{
-    font-size:23px;
-    text-align:right;
-    font-weight:bold;
-    line-height:1.3;
-}
-.header-title span{
-    font-size:11px;
-    font-weight:normal;
+    align-items:center;
+
+    padding:22px;
+
+    border-bottom:1px solid #ececec;
+
 }
 
-/* DATA TABLE */
+.logo{
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+}
+
+.logo img{
+
+    width:60px;
+
+}
+
+.logo-text{
+
+    font-size:20px;
+    font-weight:700;
+    color:#1b1b1b;
+
+}
+
+.logo-text span{
+
+    display:block;
+
+    font-size:12px;
+
+    color:#777;
+
+    font-weight:500;
+
+}
+
+.title{
+
+    text-align:right;
+
+}
+
+.title h2{
+
+    margin:0;
+
+    font-size:20px;
+
+    font-weight:700;
+
+}
+
+.title small{
+
+    color:#777;
+
+    font-size:12px;
+
+}
+
+/* =========================
+BODY
+========================= */
+
+.content{
+
+    padding:22px;
+
+}
+
 table{
+
     width:100%;
-    font-size:17px;
-    line-height:1.55;
-}
-td.label{
-    font-weight:bold;
-    width:180px;
+    border-collapse:collapse;
+
 }
 
-/* TANGGAL PRINT */
-.datefooter{
-    margin-top:25px;
-    text-align:right;
-    font-size:13px;
-    font-weight:bold;
+table td{
+
+    padding:6px 0;
+
+    font-size:14px;
+
 }
 
-/* TOMBOL PRINT */
+.label{
+
+    width:150px;
+
+    color:#555;
+
+    font-weight:600;
+
+}
+
+.value{
+
+    font-weight:500;
+
+    color:#222;
+
+}
+
+/* =========================
+FOOTER BUTTON
+========================= */
+
+.footer{
+
+    padding:20px;
+
+    display:flex;
+
+    gap:12px;
+
+}
+
 .print-btn{
-    margin-top:22px;
-    width:100%;
-    padding:10px;
-    border:none;
-    background:black;
+
+    flex:1;
+
+    background:#0F4C81;
+
     color:white;
-    font-size:16px;
-    font-weight:bold;
-    border-radius:6px;
+
+    border:none;
+
+    border-radius:10px;
+
+    padding:12px;
+
+    font-weight:600;
+
     cursor:pointer;
+
+}
+
+.print-btn:hover{
+
+    background:#0b3b65;
+
 }
 
 .close-btn{
-    position:absolute;
-    top:10px; right:15px;
-    font-size:22px;
-    background:none;
+
+    width:50px;
+
     border:none;
+
+    background:#e8e8e8;
+
+    border-radius:10px;
+
+    font-size:22px;
+
     cursor:pointer;
+
 }
 
-/* PRINT MODE */
-@media print{
-    body{background:white!important;}
-    .no-print{display:none!important;}
-    .popup-wrap{
-        box-shadow:none;
-        width:100%;
-        border:2px solid black;
-        padding:18px;
-        transform:none; position:static;
-    }
+.close-btn:hover{
+
+    background:#d9d9d9;
+
 }
+
+/* =========================
+PRINT
+========================= */
+
+@media print{
+
+    body{
+
+        background:white;
+
+    }
+
+    .popup-wrap{
+
+        position:static;
+
+        transform:none;
+
+        width:100%;
+
+        max-width:100%;
+
+        border-radius:0;
+
+        box-shadow:none;
+
+    }
+
+    .no-print{
+
+        display:none;
+
+    }
+
+}
+
 </style>
+
 </head>
+
 <body>
 
 <div class="popup-wrap">
 
-  <button class="close-btn no-print" onclick="window.close()">×</button>
+    <div class="header">
 
-  <!-- HEADER -->
-  <div class="header">
-      <img src="{{ asset('images/print_hitam.png') }}">
-      <div class="header-title">
-         DISCHARGING CARD<br>
-         <span style="font-size: 12px; font-weight: normal;">Terminal Berlian</span>
-      </div>
-  </div>
+        <div class="logo">
 
-  <!-- DETAIL -->
-  <table>
-      <tr><td class="label">No. Container</td> <td>: {{ $data->NO_CTR }}</td></tr>
-      <tr><td class="label">Voyage</td>       <td>: {{ $data->VOYAGE_NO }}</td></tr>
-      <tr><td class="label">Kapal</td>        <td>: {{ $data->NM_KAPAL }}</td></tr>
-      <tr><td class="label">Agen</td>         <td>: {{ $data->NM_AGEN }}</td></tr>
-      <tr><td class="label">Detail</td>       <td>: {{ $data->SIZE_CTR }}/{{ $data->TIPE_CTR }} - {{ $data->BERAT_CTR }}</td></tr>
-      <tr><td class="label">Truck / Nopol</td><td>: {{ $data->No_Lambung }}/{{ $data->Nopol }}</td></tr>
-      <tr><td class="label">Depo</td>         <td>: {{ $data->Depo_Tujuan }}</td></tr>
-  </table>
+            <img src="{{ asset('images/fix-logo.png') }}">
 
-  <!-- TANGGAL DARI DATABASE -->
-  <div class="datefooter">
-      Tanggal Gateout : {{ \Carbon\Carbon::parse($data->TGL_GTI)->format('d/m/Y H:i') }}
-  </div>
+            <div class="logo-text">
+                SANDRA
+                <span>Smart Discharging & Recording System</span>
+            </div>
 
-  <button onclick="window.print()" class="print-btn no-print">PRINT</button>
+        </div>
+        <div class="title">
+
+    <h2>DISCHARGING CARD</h2>
+
+    <small>
+        {{ $printTime->translatedFormat('d F Y') }}<br>
+        {{ $printTime->format('H:i:s') }}
+    </small>
 
 </div>
+
+    </div>
+
+    <div class="content">
+
+        <table>
+
+            <tr>
+                <td class="label">No. Container</td>
+                <td class="value">: {{ $data->NO_CTR }}</td>
+            </tr>
+
+            <tr>
+                <td class="label">Voyage</td>
+                <td class="value">: {{ $data->VOYAGE_NO }}</td>
+            </tr>
+
+            <tr>
+                <td class="label">Kapal</td>
+                <td class="value">: {{ $data->NM_KAPAL }}</td>
+            </tr>
+
+            <tr>
+                <td class="label">Agen</td>
+                <td class="value">: {{ $data->NM_AGEN }}</td>
+            </tr>
+
+            <tr>
+                <td class="label">Detail</td>
+                <td class="value">
+                    : {{ $data->SIZE_CTR }}/{{ $data->TIPE_CTR }} - {{ $data->BERAT_CTR }}
+                </td>
+            </tr>
+
+            <tr>
+    <td class="label">Status</td>
+    <td class="value">
+        : {{ $data->STATUS_VALUE }}
+    </td>
+</tr>
+
+            <tr>
+                <td class="label">Truck / Nopol</td>
+                <td class="value">
+                    : {{ $data->No_Lambung }} / {{ $data->Nopol }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">Depo</td>
+                <td class="value">
+                    : {{ $data->Depo_Tujuan }}
+                </td>
+            </tr>
+
+        
+
+
+
+        </table>
+
+    </div>
+
+    <div class="footer no-print">
+
+    <button class="print-btn" onclick="printCard()">
+    🖨 PRINT
+</button>
+
+        <button class="close-btn" onclick="closePopup()">
+            ×
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+function closePopup(){
+
+    if(window.opener){
+        window.close();
+    }else{
+        history.back();
+    }
+
+}
+
+</script>
 
 </body>
 </html>

@@ -1,3 +1,7 @@
+@php
+    $role = session('role');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -6,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konfirmasi Tally | PELINDO Terminal Berlian</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -142,24 +147,50 @@
 
         .suggestion-box {
             position: absolute;
-            background: white;
+            background: #ffffff;
             width: 100%;
-            max-height: 170px;
+            max-height: 220px;
             overflow-y: auto;
-            border-radius: 10px;
-            border: 1px solid #dcdcdc;
+            border-radius: 12px;
+            border: 1px solid #e1e8f0;
+            box-shadow: 0 10px 25px rgba(0, 96, 173, 0.15);
             z-index: 9999;
             display: none;
+            margin-top: 8px;
+            animation: fadeIn .2s ease;
         }
 
         .suggestion-box div {
-            padding: 10px 14px;
+            padding: 12px 16px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            color: #004c84;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f0f4f8;
+        }
+
+        .suggestion-box div:last-child {
+            border-bottom: none;
         }
 
         .suggestion-box div:hover {
-            background: #e6f2ff;
+            background: #23B4F0;
+            color: #ffffff;
+            padding-left: 22px;
+        }
+        
+        .suggestion-box .loading-text {
+            color: #888;
+            font-style: italic;
+            cursor: default;
+            font-weight: normal;
+        }
+        
+        .suggestion-box .loading-text:hover {
+            background: #fff;
+            color: #888;
+            padding-left: 16px;
         }
 
         .input-wrap {
@@ -180,16 +211,17 @@
             @csrf
 
             <label>No Container</label>
-            <div class="input-group mb-3">
+            <div class="input-wrap mb-3 input-group">
                 <input type="text" id="no_container" name="no_container" class="form-control"
                     placeholder="Contoh: INBU5091548" required>
                 <button type="button" class="btn btn-search" id="btnCari">Cari</button>
+                <div id="ctrList" class="suggestion-box" style="top: 100%;"></div>
             </div>
 
             <label>No Lambung</label>
             <div class="input-wrap mb-3">
                 <input type="text" id="no_lambung" name="no_lambung" class="form-control"
-                    placeholder="Contoh: TB-09" required>
+                    placeholder="Contoh: Z12" required>
                 <div id="lambungList" class="suggestion-box"></div>
             </div>
 
@@ -261,44 +293,82 @@
                         document.getElementById("nopol_show").innerText = data.row.Nopol ?? "-";
                         document.getElementById("depo").innerText = data.row.Depo_Tujuan ?? "-";
                     } else {
-                        alert("Data tidak ditemukan!");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Data container tidak ditemukan di database!',
+                            confirmButtonColor: '#0060ad'
+                        });
                         document.getElementById("dataContainer").style.display = "none";
                     }
                 });
         });
 
         // ===================== AUTO SUGGEST =====================
-        function autoSuggest(inputId, boxId, route) {
+        function autoSuggest(inputId, boxId, route, minChar = 4) {
             const input = document.getElementById(inputId);
             const box = document.getElementById(boxId);
+            let timeout = null;
 
             input.addEventListener("keyup", () => {
-                let val = input.value;
-                if (val.length < 2) { box.style.display = "none"; return; }
+                clearTimeout(timeout);
+                let val = input.value.trim();
+                
+                if (val.length < minChar) { 
+                    box.style.display = "none"; 
+                    return; 
+                }
 
-                fetch(`${route}?q=${val}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        box.innerHTML = "";
-                        if (data.length > 0) {
-                            box.style.display = "block";
-                            data.forEach(item => {
-                                let div = document.createElement("div");
-                                div.textContent = item;
-                                div.onclick = function () {
-                                    input.value = item;
-                                    box.style.display = "none";
-                                }
-                                box.appendChild(div);
-                            });
-                        } else box.style.display = "none";
-                    });
+                // Wait 1 second (1000ms) idle before fetching
+                timeout = setTimeout(() => {
+                    box.innerHTML = "<div class='loading-text'>Mencari data...</div>";
+                    box.style.display = "block";
+
+                    fetch(`${route}?q=${val}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            box.innerHTML = "";
+                            if (data.length > 0) {
+                                data.forEach(item => {
+                                    let div = document.createElement("div");
+                                    div.textContent = item;
+                                    div.onclick = function () {
+                                        input.value = item;
+                                        box.style.display = "none";
+                                    }
+                                    box.appendChild(div);
+                                });
+                            } else {
+                                box.innerHTML = "<div class='loading-text'>Tidak ada hasil</div>";
+                                setTimeout(() => { box.style.display = "none"; }, 1500);
+                            }
+                        })
+                        .catch(() => {
+                            box.style.display = "none";
+                        });
+                }, 1000); 
+            });
+
+            // Close suggestion box when clicking outside
+            document.addEventListener("click", function (e) {
+                if (e.target !== input && !box.contains(e.target)) {
+                    box.style.display = "none";
+                }
             });
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            autoSuggest("no_container", "ctrList", "/api/cari-container");
-            autoSuggest("no_lambung", "lambungList", "/api/cari-lambung");
+            autoSuggest("no_container", "ctrList", "/api/cari-container", 4);
+            autoSuggest("no_lambung", "lambungList", "/api/cari-lambung", 2);
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '{{ session("error") }}',
+                    confirmButtonColor: '#0060ad'
+                });
+            @endif
         });
     </script>
 

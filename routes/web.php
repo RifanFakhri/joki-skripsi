@@ -37,17 +37,6 @@ Route::get('/dischargingcardsystem', [DischargingController::class, 'index'])->n
 Route::get('/discharging/edit/{NO_CTR}', [DischargingController::class, 'editForm'])->name('discharging.edit.form');
 Route::post('/discharging/edit/{NO_CTR}', [DischargingController::class, 'edit'])->name('discharging.edit');
 Route::get('/discharging/print/{NO_CTR}', [DischargingController::class, 'print'])->name('discharging.print');
-Route::get('/gateout-database', function () {
-
-    $gateout = DB::table('dc_gateout')
-        ->orderBy('id', 'DESC')
-        ->get();
-
-    return view('gateout_database', [
-        'gateout' => $gateout
-    ]);
-
-})->name('gateout.database');
 Route::post('/discharging/gateout/{NO_CTR}',[DischargingController::class, 'gateout'])->name('discharging.gateout');
 
 // API autocomplete
@@ -68,3 +57,16 @@ Route::get('/gateout/export/pdf', [DischargingController::class, 'exportPDF'])->
 
 // EMAIL
 Route::post('/gateout/email/pdf',[DischargingController::class, 'sendPdfEmail'])->name('gateout.email.pdf');
+
+Route::get('/filter-export', function () {
+
+    $gateout = DB::table('dc_gateout')
+        ->orderBy('id','DESC')
+        ->get();
+
+    return view('gateout_database', [
+        'gateout' => $gateout,
+        'data' => $gateout
+    ]);
+
+})->name('gateout.export');

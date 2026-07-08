@@ -1,3 +1,7 @@
+@php
+    $role = session('role');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>

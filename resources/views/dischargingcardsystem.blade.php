@@ -2,6 +2,11 @@
 
 @section('content')
 
+@php
+    $role = session('role');
+@endphp
+
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Discharging Card System</title>
@@ -163,6 +168,19 @@
     margin-right: 6px;
 }
 
+.btn-disabled{
+    background: #d1d5db !important;
+    color: #6b7280 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    border: 1px solid #cbd5e1;
+    opacity: 0.8;
+}
+
+.btn-disabled img{
+    opacity: .5;
+}
+
   </style>
 </head>
 
@@ -194,17 +212,7 @@
         {{-- REFRESH --}}
         <button class="btn-refresh">Refresh</button>
 
-        <button type="button"
-        class="btn-gateout d-flex align-items-center justify-content-center"
-        data-bs-toggle="modal"
-        data-bs-target="#gateoutModal">
-
-    <img src="{{ asset('images/ikon_gateout.png') }}"
-         class="icon-btn">
-
-    Gate Out
-</button>
-
+        
     </div>
 
 
@@ -215,10 +223,10 @@
             <tr>
                 <th>No</th>
                 <th>Tanggal</th>
-                <th>Voyage</th>
-                <th>Kapal</th>
-                <th>Agen</th>
                 <th>No. Container</th>
+                <th>Kapal</th>
+                <th>Voyage</th>
+                <th>Agen</th>
                 <th>Ukuran</th>
                 <th>Tipe</th>
                 <th>Status</th>
@@ -238,10 +246,11 @@
                 <tr>
                     <td>{{ $i+1 }}</td>
                     <td>{{ $row->TGL_GTI }}</td>
-                    <td>{{ $row->VOYAGE_NO }}</td>
-                    <td>{{ $row->NM_KAPAL }}</td>
-                    <td>{{ $row->NM_AGEN }}</td>
                     <td>{{ $row->NO_CTR }}</td>
+                    <td>{{ $row->NM_KAPAL }}</td>
+                    <td>{{ $row->VOYAGE_NO }}</td>
+                    <td>{{ $row->NM_AGEN }}</td>
+                   
                     <td>{{ $row->SIZE_CTR }}</td>
                     <td>{{ $row->TIPE_CTR }}</td>
 
@@ -266,11 +275,22 @@
 
                     {{-- ACTION BUTTONS --}}
                     <td style="width:100px;">
-                        <a href="{{ route('discharging.edit.form', $row->NO_CTR) }}" class="btn-action btn-edit">
-                            <img src="{{ asset('images/edit.png') }}" class="icon-btn"> Edit
-                        </a>
+                    @if($role == 'gateout')
+<a href="{{ route('discharging.edit.form', $row->NO_CTR) }}"
+   class="btn-action btn-edit">
+    <img src="{{ asset('images/edit.png') }}" class="icon-btn">
+    Edit
+</a>
+@else
+<a href="javascript:void(0)"
+   class="btn-action btn-disabled">
+    <img src="{{ asset('images/edit.png') }}" class="icon-btn">
+    Edit
+</a>
+@endif
 
-                        <form action="{{ route('discharging.gateout', $row->NO_CTR) }}" method="POST">
+@if($role == 'gateout')
+<form action="{{ route('discharging.gateout', $row->NO_CTR) }}" method="POST">
     @csrf
 
     <button type="submit" class="btn-action btn-gate">
@@ -278,10 +298,27 @@
         Gate
     </button>
 </form>
+@else
+<button class="btn-action btn-disabled" disabled>
+    <img src="{{ asset('images/gate.png') }}" class="icon-btn">
+    Gate
+</button>
+@endif
 
-                        <a href="{{ route('discharging.print', $row->NO_CTR) }}" class="btn-action btn-print">
-                            <img src="{{ asset('images/print.png') }}" class="icon-btn"> Print
-                        </a>
+
+@if($role == 'gateout')
+<a href="{{ route('discharging.print', $row->NO_CTR) }}"
+   class="btn-action btn-print">
+    <img src="{{ asset('images/print.png') }}" class="icon-btn">
+    Print
+</a>
+@else
+<a href="javascript:void(0)"
+   class="btn-action btn-disabled">
+    <img src="{{ asset('images/print.png') }}" class="icon-btn">
+    Print
+</a>
+@endif
                     </td>
 
                 </tr>
@@ -387,27 +424,41 @@ setInterval(updateClock, 1000);
         </div>
 
         <!-- EXPORT & EMAIL INPUT -->
-        <div class="row g-2 mb-3">
+        @if($role == 'gateout')
 
-          <div class="col-md-4">
-            <input type="text" id="manualEmail" class="form-control"
-              placeholder="Masukkan email (opsional)"
-              style="height:48px; border-radius:12px;">
-          </div>
+<div id="exportSection"
+     class="row g-2 mb-3"
+     style="display:none;">
 
-          <div class="col-md-3">
-    <button class="btn btn-danger w-100 fw-semibold btn-download-pdf"
-        style="border-radius:12px; height:48px;">
-        Download PDF
-    </button>
+    <div class="col-md-4">
+        <input
+            type="text"
+            id="manualEmail"
+            class="form-control"
+            placeholder="Masukkan email (opsional)"
+            style="height:48px;border-radius:12px;">
+    </div>
+
+    <div class="col-md-3">
+        <button
+            class="btn btn-danger w-100 fw-semibold btn-download-pdf"
+            style="height:48px;border-radius:12px;">
+            Download PDF
+        </button>
+    </div>
+
+    <div class="col-md-3">
+        <button
+            class="btn btn-warning w-100 fw-semibold btn-email-pdf"
+            style="height:48px;border-radius:12px;">
+            Kirim PDF
+        </button>
+    </div>
+
 </div>
 
-<div class="col-md-3">
-    <button class="btn btn-warning w-100 fw-semibold btn-email-pdf"
-        style="border-radius:12px; height:48px;">
-        Kirim PDF
-    </button>
-</div>
+@endif
+
 
         <!-- TABLE -->
         <div style="max-height:420px; overflow-y:auto;">
@@ -416,10 +467,10 @@ setInterval(updateClock, 1000);
 <tr style="background:#007BCE;color:white;">
     <th>No</th>
     <th>Tanggal</th>
-    <th>Voyage</th>
-    <th>Kapal</th>
-    <th>Agen</th>
     <th>No Container</th>
+    <th>Kapal</th>
+    <th>Voyage</th>
+    <th>Agen</th>
     <th>Ukuran</th>
     <th>Tipe</th>
     <th>Status</th>
@@ -444,24 +495,15 @@ setInterval(updateClock, 1000);
     {{ \Carbon\Carbon::parse($g->tgl_gateout)->format('d-m-Y H:i:s') }}
 </td>
 
-<td>{{ $g->VOYAGE_NO }}</td>
-
-<td>{{ $g->NM_KAPAL }}</td>
-
-<td>{{ $g->NM_AGEN }}</td>
-
 <td>{{ $g->NO_CTR }}</td>
-
+<td>{{ $g->NM_KAPAL }}</td>
+<td>{{ $g->VOYAGE_NO }}</td>
+<td>{{ $g->NM_AGEN }}</td>
 <td>{{ $g->SIZE_CTR }}</td>
-
 <td>{{ $g->TIPE_CTR }}</td>
-
 <td>{{ $g->STATUS_VALUE }}</td>
-
 <td>{{ $g->BERAT_CTR }}</td>
-
 <td>{{ $g->POL }}</td>
-
 <td>{{ $g->POD }}</td>
 
 <td>{{ $g->No_Lambung }}</td>
@@ -489,8 +531,10 @@ setInterval(updateClock, 1000);
   </div>
 </div>
 
-<script>
 
+
+<script>
+let modalMode = "database";
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -508,6 +552,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+
+  const btnDatabase = document.querySelector(".btn-gateout-database");
+const btnFilter = document.querySelector(".btn-gateout-filter");
+
+const exportSection = document.getElementById("exportSection");
+
+btnDatabase?.addEventListener("click", function(e){
+
+    e.preventDefault();
+
+    modalMode = "database";
+
+    if(exportSection){
+        exportSection.style.display = "none";
+    }
+
+    new bootstrap.Modal(document.getElementById("gateoutModal")).show();
+
+});
+
+btnFilter?.addEventListener("click", function(e){
+
+    e.preventDefault();
+
+    modalMode = "filter";
+
+    if(exportSection){
+        exportSection.style.display = "flex";
+    }
+
+    new bootstrap.Modal(document.getElementById("gateoutModal")).show();
+
+});
+});
 
   /* BUKA MODAL */
   document.querySelector('.btn-gateout')
@@ -621,8 +700,10 @@ document.getElementById("size_filter")
 /* ===========================
    DOWNLOAD PDF SESUAI FILTER
 =========================== */
+@if($role == 'gateout')
+
 document.querySelector(".btn-download-pdf")
-.addEventListener("click", () => {
+?.addEventListener("click", () => {
 
     const tanggal = document.getElementById("filter_date").value;
     const kapal = document.getElementById("filter_kapal").value;
@@ -630,50 +711,65 @@ document.querySelector(".btn-download-pdf")
     const text = document.getElementById("filter_text").value;
 
     const params = new URLSearchParams({
-        tanggal: tanggal,
-        kapal: kapal,
-        depo: depo,
-        text: text
+        tanggal,
+        kapal,
+        depo,
+        text
     });
 
     window.location.href =
         "{{ route('export.gateout.pdf') }}?" + params.toString();
+
 });
-  
+
+@endif
 
 
   /* =============================
      EMAIL PDF
   ============================= */
+  @if($role == 'gateout')
+
   document.querySelector(".btn-email-pdf")
 ?.addEventListener("click", () => {
 
-    let email = document.getElementById("manualEmail").value;
+    const email = document.getElementById("manualEmail").value;
 
-    if(email === ""){
+    if(email==""){
         alert("Masukkan email terlebih dahulu");
         return;
     }
 
-    fetch("{{ route('gateout.email.pdf') }}", {
-        method: "POST",
-        headers: {
+    fetch("{{ route('gateout.email.pdf') }}",{
+
+        method:"POST",
+
+        headers:{
             "Content-Type":"application/json",
             "X-CSRF-TOKEN":"{{ csrf_token() }}"
         },
-        body: JSON.stringify({
-            email: email
+
+        body:JSON.stringify({
+
+            email:email,
+
+            tanggal:document.getElementById("filter_date").value,
+
+            kapal:document.getElementById("filter_kapal").value,
+
+            depo:document.getElementById("filter_depo").value,
+
+            text:document.getElementById("filter_text").value
+
         })
+
     })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-    })
-    .catch(() => {
-        alert("Gagal mengirim PDF");
-    });
+    .then(res=>res.json())
+    .then(data=>alert(data.message))
+    .catch(()=>alert("Gagal mengirim PDF"));
 
 });
+@endif
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

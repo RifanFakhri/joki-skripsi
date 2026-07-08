@@ -49,24 +49,24 @@ class TallyController extends Controller
     }
 
     public function getData(Request $request)
-    {
-        $noCtr = $request->no;
-        $noLambung = $request->lambung;
+{
+    $row = DB::table('dummy_data_dc_new')
+        ->where('NO_CTR', trim($request->no))
+        ->first();
 
-        $row = DB::table('dummy_data_dc_new')
-                ->where('NO_CTR', $noCtr)
-                ->where('No_Lambung', $noLambung)
-                ->first();
-
-        if ($row) {
-            return response()->json([
-                'status' => 'found',
-                'row' => $row
-            ]);
-        }
-
-        return response()->json(['status' => 'not_found']);
+    if ($row) {
+        return response()->json([
+            'status' => 'found',
+            'row' => $row
+        ]);
     }
+
+    return response()->json([
+        'status' => 'not_found'
+    ]);
+}
+
+
 
     public function submit(Request $request)
     {
@@ -76,36 +76,52 @@ class TallyController extends Controller
 
         // Ambil data container dari dummy_data_dc_new
         $row = DB::table('dummy_data_dc_new')
-            ->where('NO_CTR', $request->no_container)
+            ->where('NO_CTR', trim($request->no_container))
             ->first();
 
         if (!$row) {
             return redirect()->back()->with('error', 'Data container tidak ditemukan!');
         }
 
+        // AUTO FORMAT & VALIDASI NO LAMBUNG (Sesuai trigger DB trg_check_no_lambung)
+        $kapal_val = strtoupper($kapal);
+        
+        // Hapus spasi dan jadikan huruf besar (case-insensitive & space-insensitive)
+        $lambung_val = strtoupper(str_replace(' ', '', $request->no_lambung));
+
+        // Auto-fix jika user hanya mengetik angka (misal "13" -> "G13")
+        if (str_contains($kapal_val, 'GUHI MAS') && preg_match('/^[0-9]+$/', $lambung_val)) {
+            $lambung_val = 'G' . $lambung_val;
+        } elseif (str_contains($kapal_val, 'TANTO') && preg_match('/^[0-9]+$/', $lambung_val)) {
+            $lambung_val = 'T' . $lambung_val;
+        } elseif (str_contains($kapal_val, 'MERATUS') && preg_match('/^[0-9]+$/', $lambung_val)) {
+            $lambung_val = 'M' . $lambung_val;
+        }
+
+        // Validasi final
+        if (str_contains($kapal_val, 'GUHI MAS') && !preg_match('/^G[0-9]+$/', $lambung_val)) {
+            return redirect()->back()->with('error', 'No Lambung untuk kapal GUHI MAS harus diawali huruf G lalu diikuti angka (contoh: G13)');
+        }
+        if (str_contains($kapal_val, 'TANTO') && !preg_match('/^T[0-9]+$/', $lambung_val)) {
+            return redirect()->back()->with('error', 'No Lambung untuk kapal TANTO harus diawali huruf T lalu diikuti angka (contoh: T12)');
+        }
+        if (str_contains($kapal_val, 'MERATUS') && !preg_match('/^M[0-9]+$/', $lambung_val)) {
+            return redirect()->back()->with('error', 'No Lambung untuk kapal MERATUS harus diawali huruf M lalu diikuti angka (contoh: M09)');
+        }
+
         // Update dummy_data_dc_new
         DB::table('dummy_data_dc_new')
-            ->where('NO_CTR', $request->no_container)
-            ->update([
-                'No_Lambung' => $request->no_lambung,
-                'Keterangan' => $request->keterangan,
-                'TGL_GTI'    => now(),
-                'NM_KAPAL'   => $kapal,
-                'alat'       => $alat,
-                'operator'   => $operator
-            ]);
-
-        // Insert ke dc_gateout
-        DB::table('dc_gateout')->insert([
-            'NO_CTR'          => $request->no_container,
-            'No_Lambung'      => $request->no_lambung,
-            'NM_KAPAL'        => $kapal,
-            'alat'            => $alat,
-            'operator'        => $operator,
-            'TGL_GTI'         => now(),
-            'STATUS_VALUE'    => $row->STATUS_VALUE ?? '-', // Ambil dari database
-            'STATUS_GATEOUT'  => 'Belum'                   // Status gate out baru
+        ->where('NO_CTR', trim($request->no_container))
+        ->update([
+            'No_Lambung'    => $lambung_val,
+            'Keterangan'    => $request->keterangan,
+            'TGL_GTI'       => now(),
+            'NM_KAPAL'      => $kapal,
+            'alat'          => $alat,
+            'operator'      => $operator,
         ]);
+
+
 
         return redirect()->route('discharging')->with('success', 'Data berhasil dikonfirmasi & masuk Discharging!');
     }

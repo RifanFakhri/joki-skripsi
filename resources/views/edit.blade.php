@@ -1,3 +1,6 @@
+@php
+    $role = session('role');
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -92,45 +95,105 @@
 </div>
 
 <div class="row mb-3">
+
+    <div class="col-md-4">
+        <div class="section-title">Nama Agen</div>
+        <input type="text" name="nama_agen"
+            class="form-control input-custom"
+            value="{{ $data->NM_AGEN }}">
+    </div>
+
+    <div class="col-md-4">
+        <div class="section-title">No. Container</div>
+        <input type="text"
+            class="form-control input-custom"
+            value="{{ $data->NO_CTR }}"
+            readonly>
+    </div>
+
+    <div class="col-md-4">
+        <div class="section-title">Status</div>
+        <input type="text"
+            class="form-control input-custom"
+            value="{{ $data->STATUS_VALUE }}"
+            readonly>
+    </div>
+
+</div>
+
+<div class="row mb-3">
+
     <div class="col-md-3">
         <div class="section-title">Ukuran</div>
-        <input type="text" name="ukuran" class="form-control input-custom" 
-               value="{{ $data->SIZE_CTR }}">
+        <input type="text"
+            name="ukuran"
+            class="form-control input-custom"
+            value="{{ $data->SIZE_CTR }}">
     </div>
 
     <div class="col-md-3">
         <div class="section-title">Tipe</div>
-        <input type="text" name="tipe" class="form-control input-custom" 
-               value="{{ $data->TIPE_CTR }}">
+        <input type="text"
+            name="tipe"
+            class="form-control input-custom"
+            value="{{ $data->TIPE_CTR }}">
     </div>
 
     <div class="col-md-3">
         <div class="section-title">Berat</div>
-        <input type="text" name="berat" class="form-control input-custom" 
-               value="{{ $data->BERAT_CTR }}">
+        <input type="text"
+            name="berat"
+            class="form-control input-custom"
+            value="{{ $data->BERAT_CTR }}">
     </div>
 
     <div class="col-md-3">
         <div class="section-title">Depo</div>
-        <input type="text" name="depo" class="form-control input-custom" 
-               value="{{ $data->Depo_Tujuan }}">
+        <input type="text"
+            name="depo"
+            class="form-control input-custom"
+            value="{{ $data->Depo_Tujuan }}">
     </div>
+
 </div>
 
-<div class="row mb-4">
+<div class="row mb-3">
+
+    <div class="col-md-4">
+        <div class="section-title">POL</div>
+        <input type="text"
+            class="form-control input-custom"
+            value="{{ $data->POL }}"
+            readonly>
+    </div>
+
+    <div class="col-md-4">
+        <div class="section-title">POD</div>
+        <input type="text"
+            class="form-control input-custom"
+            value="{{ $data->POD }}"
+            readonly>
+    </div>
+
+    <div class="row mb-4">
+
     <div class="col-md-6">
         <div class="section-title">Nama Truck / No Lambung</div>
-        <input type="text" name="nama_truck" class="form-control input-custom" 
-               value="{{ $data->No_Lambung }}">
+        <input type="text"
+            name="nama_truck"
+            class="form-control input-custom"
+            value="{{ $data->No_Lambung }}">
     </div>
 
     <div class="col-md-6">
-        <div class="section-title">No. Polisi</div>
-        <input type="text" name="no_polisi" class="form-control input-custom" 
-               value="{{ $data->Nopol }}">
+        <div class="section-title">No Polisi</div>
+        <input type="text"
+            name="no_polisi"
+            class="form-control input-custom"
+            value="{{ $data->Nopol }}">
     </div>
-</div>
 
+</div>
 
         <div class="d-flex justify-content-end">
             <a href="{{ url('/dischargingcardsystem') }}" class="btn btn-cancel me-3">Batalkan</a>
